@@ -26,11 +26,14 @@ export const skemaProfil = z.object({
     .trim()
     .min(3, 'Nama lengkap minimal 3 huruf')
     .max(60, 'Nama terlalu panjang'),
+  // 40, bukan 20: nama kelas di sini memakai nama tokoh, bukan nomor —
+  // "XI-Agustinus Adisoetjipto" saja sudah 25 karakter. Batas lama membuat kelas
+  // yang sah di DAFTAR_KELAS justru ditolak saat disimpan.
   class_name: z
     .string()
     .trim()
     .min(1, 'Kelas wajib diisi')
-    .max(20, 'Maksimal 20 karakter'),
+    .max(40, 'Maksimal 40 karakter'),
   phone: z
     .string()
     .trim()
