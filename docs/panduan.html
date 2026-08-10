@@ -1,0 +1,886 @@
+<title>Panduan Bazaar OSIS &mdash; untuk Peserta & Panitia</title>
+
+<style>
+  :root {
+    --ground: #fdfcf7;
+    --surface: #ffffff;
+    --ink: #403e4b;
+    --ink-soft: #6e6b7b;
+    --ink-faint: #9794a3;
+    --line: #e8e5da;
+    --accent: #2f7a6b;
+    --accent-deep: #245c51;
+
+    --mint: #c9ebe0;
+    --peri: #d5dcf5;
+    --rose: #f6d6d6;
+    --apricot: #f8e2c6;
+    --lilac: #ebd8f0;
+    --slate: #e6e4dc;
+
+    --chip-ink-mint: #1f5a4d;
+    --chip-ink-peri: #3a4780;
+    --chip-ink-rose: #8a3c40;
+    --chip-ink-apricot: #7a5320;
+    --chip-ink-slate: #5b5850;
+
+    --display: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: ui-monospace, 'Cascadia Code', 'SF Mono', Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #23222a;
+      --surface: #2b2a33;
+      --ink: #eceaf2;
+      --ink-soft: #b3afc0;
+      --ink-faint: #8b8799;
+      --line: #3b3945;
+      --accent: #8fd8c4;
+      --accent-deep: #b0e6d6;
+
+      --mint: #2c4f47;
+      --peri: #363d5c;
+      --rose: #56383c;
+      --apricot: #55452c;
+      --lilac: #47374f;
+      --slate: #3a3843;
+
+      --chip-ink-mint: #b6e8d8;
+      --chip-ink-peri: #c3cdf2;
+      --chip-ink-rose: #f0bcbe;
+      --chip-ink-apricot: #edcb96;
+      --chip-ink-slate: #c3bfb4;
+    }
+  }
+
+  :root[data-theme='dark'] {
+    --ground: #23222a;
+    --surface: #2b2a33;
+    --ink: #eceaf2;
+    --ink-soft: #b3afc0;
+    --ink-faint: #8b8799;
+    --line: #3b3945;
+    --accent: #8fd8c4;
+    --accent-deep: #b0e6d6;
+
+    --mint: #2c4f47;
+    --peri: #363d5c;
+    --rose: #56383c;
+    --apricot: #55452c;
+    --lilac: #47374f;
+    --slate: #3a3843;
+
+    --chip-ink-mint: #b6e8d8;
+    --chip-ink-peri: #c3cdf2;
+    --chip-ink-rose: #f0bcbe;
+    --chip-ink-apricot: #edcb96;
+    --chip-ink-slate: #c3bfb4;
+  }
+
+  :root[data-theme='light'] {
+    --ground: #fdfcf7;
+    --surface: #ffffff;
+    --ink: #403e4b;
+    --ink-soft: #6e6b7b;
+    --ink-faint: #9794a3;
+    --line: #e8e5da;
+    --accent: #2f7a6b;
+    --accent-deep: #245c51;
+
+    --mint: #c9ebe0;
+    --peri: #d5dcf5;
+    --rose: #f6d6d6;
+    --apricot: #f8e2c6;
+    --lilac: #ebd8f0;
+    --slate: #e6e4dc;
+
+    --chip-ink-mint: #1f5a4d;
+    --chip-ink-peri: #3a4780;
+    --chip-ink-rose: #8a3c40;
+    --chip-ink-apricot: #7a5320;
+    --chip-ink-slate: #5b5850;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--display);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 22px;
+  }
+
+  /* ---------- Kop ---------- */
+  .kop {
+    padding: 56px 0 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .kop svg { width: 60px; height: 60px; }
+  .kop h1 {
+    margin: 0;
+    font-size: clamp(2.1rem, 7vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+  .kop p {
+    margin: 0;
+    max-width: 60ch;
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+  }
+
+  /* ---------- Nav lengket ---------- */
+  nav.jump {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--ground) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-block: 1px solid var(--line);
+  }
+  nav.jump ol {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 9px 22px;
+    display: flex;
+    gap: 6px;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  nav.jump ol::-webkit-scrollbar { display: none; }
+  nav.jump a {
+    display: block;
+    white-space: nowrap;
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    color: var(--ink-soft);
+  }
+  nav.jump a:hover { background: var(--slate); color: var(--ink); }
+
+  /* ---------- Pita pembuka tiap audiens ---------- */
+  .pita {
+    margin-top: 56px;
+    padding: 34px 0 30px;
+    border-block: 1px solid var(--line);
+  }
+  .pita--peserta { background: var(--mint); }
+  .pita--panitia { background: var(--peri); }
+  .pita .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin: 0 0 8px;
+  }
+  .pita--peserta .eyebrow { color: var(--chip-ink-mint); }
+  .pita--panitia .eyebrow { color: var(--chip-ink-peri); }
+  .pita h2 {
+    margin: 0 0 8px;
+    font-size: clamp(1.6rem, 5vw, 2.1rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  .pita p { margin: 0; max-width: 58ch; font-size: 0.95rem; }
+  .pita--peserta p { color: var(--chip-ink-mint); }
+  .pita--panitia p { color: var(--chip-ink-peri); }
+
+  /* ---------- Isi ---------- */
+  section > h3 {
+    margin: 44px 0 14px;
+    font-size: 1.16rem;
+    font-weight: 750;
+    letter-spacing: -0.015em;
+  }
+  p, li { max-width: 68ch; }
+  p { margin: 0 0 14px; }
+  a { color: var(--accent-deep); }
+
+  /* ---------- Rel langkah bernomor ---------- */
+  ol.langkah {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 2px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+  ol.langkah > li {
+    position: relative;
+    padding-left: 26px;
+    max-width: none;
+  }
+  ol.langkah > li::before {
+    content: attr(data-n);
+    position: absolute;
+    left: -13px;
+    top: 1px;
+    width: 24px;
+    height: 24px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--line);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+  }
+  ol.langkah h4 {
+    margin: 0 0 5px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  ol.langkah p { margin: 0 0 8px; color: var(--ink-soft); font-size: 0.94rem; }
+  ol.langkah p:last-child { margin-bottom: 0; }
+
+  /* ---------- Chip & kode ---------- */
+  .chip {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .chip--mint { background: var(--mint); color: var(--chip-ink-mint); }
+  .chip--apricot { background: var(--apricot); color: var(--chip-ink-apricot); }
+  .chip--rose { background: var(--rose); color: var(--chip-ink-rose); }
+  .chip--slate { background: var(--slate); color: var(--chip-ink-slate); }
+  .chip--peri { background: var(--peri); color: var(--chip-ink-peri); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--slate);
+    color: var(--ink);
+    padding: 1px 5px;
+    border-radius: 5px;
+  }
+
+  /* ---------- Tabel ---------- */
+  .tabel-bungkus { overflow-x: auto; margin: 0 0 16px; }
+  table {
+    width: 100%;
+    min-width: 460px;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  th {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+  }
+  td:first-child { white-space: nowrap; }
+  td.num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+
+  /* ---------- Catatan ---------- */
+  .catatan {
+    margin: 0 0 16px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+  }
+  .catatan strong { color: var(--ink); }
+  .catatan--penting { background: var(--apricot); border-color: transparent; color: var(--chip-ink-apricot); }
+  .catatan--penting strong { color: var(--chip-ink-apricot); }
+
+  /* ---------- Tanya jawab ---------- */
+  details {
+    border-bottom: 1px solid var(--line);
+    padding: 13px 0;
+  }
+  summary {
+    cursor: pointer;
+    font-weight: 650;
+    font-size: 0.96rem;
+    list-style: none;
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::before {
+    content: '+';
+    font-family: var(--mono);
+    color: var(--accent);
+    font-weight: 700;
+  }
+  details[open] summary::before { content: '&ndash;'; }
+  details p { margin: 9px 0 0 20px; color: var(--ink-soft); font-size: 0.93rem; }
+
+  /* ---------- Kaki ---------- */
+  footer {
+    margin-top: 64px;
+    padding: 26px 0 56px;
+    border-top: 1px solid var(--line);
+    color: var(--ink-faint);
+    font-size: 0.84rem;
+  }
+
+  a:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="kop">
+    <svg viewBox="0 0 64 64" role="img" aria-label="Logo Bazaar OSIS">
+      <defs>
+        <clipPath id="kanopi">
+          <path d="M8 34 Q12 42 16 34 Q20 42 24 34 Q28 42 32 34 Q36 42 40 34 Q44 42 48 34 Q52 42 56 34 L56 20 Q56 16 52 16 L12 16 Q8 16 8 20 Z" />
+        </clipPath>
+      </defs>
+      <rect x="13" y="34" width="3.2" height="21" rx="1.6" fill="#3f6f64" />
+      <rect x="47.8" y="34" width="3.2" height="21" rx="1.6" fill="#3f6f64" />
+      <rect x="9" y="53" width="46" height="3.2" rx="1.6" fill="#3f6f64" />
+      <g clip-path="url(#kanopi)">
+        <rect x="8" y="14" width="9.6" height="30" fill="#f0afb0" />
+        <rect x="17.6" y="14" width="9.6" height="30" fill="#f2c79a" />
+        <rect x="27.2" y="14" width="9.6" height="30" fill="#98dcc4" />
+        <rect x="36.8" y="14" width="9.6" height="30" fill="#a8b6e8" />
+        <rect x="46.4" y="14" width="9.6" height="30" fill="#d8b0de" />
+      </g>
+      <path d="M8 34 Q12 42 16 34 Q20 42 24 34 Q28 42 32 34 Q36 42 40 34 Q44 42 48 34 Q52 42 56 34 L56 20 Q56 16 52 16 L12 16 Q8 16 8 20 Z" fill="none" stroke="#3f6f64" stroke-width="2.4" stroke-linejoin="round" />
+      <circle cx="32" cy="9" r="3.4" fill="#98dcc4" stroke="#3f6f64" stroke-width="2.2" />
+    </svg>
+
+    <h1>Panduan Bazaar OSIS</h1>
+    <p>
+      Cara memakai aplikasi PO bazaar &mdash; untuk peserta yang mau merebut slot, dan untuk
+      panitia yang mengelola pesanan serta uangnya. Baca bagian yang sesuai peranmu.
+    </p>
+  </header>
+</div>
+
+<nav class="jump" aria-label="Lompat ke bagian">
+  <ol>
+    <li><a href="#peserta">Untuk peserta</a></li>
+    <li><a href="#status">Arti status</a></li>
+    <li><a href="#tanya-peserta">Tanya jawab</a></li>
+    <li><a href="#panitia">Untuk panitia</a></li>
+    <li><a href="#keuangan">Membaca keuangan</a></li>
+    <li><a href="#aturan">Aturan sistem</a></li>
+    <li><a href="#masalah">Kalau bermasalah</a></li>
+  </ol>
+</nav>
+
+<!-- ============ PESERTA ============ -->
+<div class="pita pita--peserta" id="peserta">
+  <div class="wrap">
+    <p class="eyebrow">Bagian satu</p>
+    <h2>Untuk peserta</h2>
+    <p>
+      Enam langkah dari buka aplikasi sampai pesananmu jadi. Satu hal yang perlu diingat:
+      slot baru jadi milikmu setelah pembayaranmu dikonfirmasi, bukan saat memesan.
+    </p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section>
+    <h3>Langkah demi langkah</h3>
+
+    <ol class="langkah">
+      <li data-n="1">
+        <h4>Masuk pakai akun Google</h4>
+        <p>
+          Tidak perlu daftar dan tidak perlu bikin kata sandi baru. Tekan
+          <strong>Masuk dengan Google</strong>, pilih akunmu, selesai.
+        </p>
+      </li>
+
+      <li data-n="2">
+        <h4>Lengkapi data diri</h4>
+        <p>
+          Muncul sekali saja: <strong>nama lengkap</strong>, <strong>kelas</strong>, dan
+          <strong>nomor HP</strong>. Panitia butuh ini untuk menghubungimu saat pesanan
+          diproses dan saat sudah siap diambil.
+        </p>
+        <p>
+          Nomor boleh diketik bebas &mdash; <code>+62 812-3456-7890</code> atau
+          <code>0812 3456 7890</code> sama saja, nanti dirapikan sendiri. Selama data ini
+          belum diisi, tombol pesan belum bisa dipakai.
+        </p>
+      </li>
+
+      <li data-n="3">
+        <h4>Buka tab War, lihat sisa slot</h4>
+        <p>
+          Tiap menu punya jumlah slot terbatas. Angka <em>&ldquo;0 dari 40 slot terisi&rdquo;</em> dan
+          batang di bawahnya bergerak sendiri saat orang lain memesan &mdash; tidak perlu
+          menyegarkan halaman.
+        </p>
+      </li>
+
+      <li data-n="4">
+        <h4>Tekan Pesan Slot</h4>
+        <p>
+          Pilih jumlah porsi lalu konfirmasi. Sebagian menu dibatasi maksimal beberapa
+          porsi per orang; kalau kena batas, aplikasi memberi tahu.
+        </p>
+        <p>Ada kolom catatan opsional &mdash; misalnya <em>tidak pedas</em> atau <em>less ice</em>.</p>
+      </li>
+
+      <li data-n="5">
+        <h4>Tunggu panitia menyetujui</h4>
+        <p>
+          Pesananmu masuk antrian. <strong>Memesan belum mengunci slot</strong> &mdash; orang lain
+          masih bisa memesan porsi yang sama.
+        </p>
+      </li>
+
+      <li data-n="6">
+        <h4>Bayar sebelum tenggat &mdash; ini yang mengunci slotmu</h4>
+        <p>
+          Setelah disetujui, hitung mundur mulai berjalan di tab <strong>PO Saya</strong>
+          (bawaannya 24 jam). Bayarlah ke panitia dalam waktu itu.
+        </p>
+        <p>
+          Slot baru benar-benar jadi milikmu ketika panitia menandai pembayaranmu lunas.
+          Kalau tenggatnya lewat dan belum dibayar, pesanan dilepas otomatis dan slotnya
+          kembali tersedia untuk orang lain. <strong>Siapa yang bayar lebih dulu, dia yang
+          dapat.</strong>
+        </p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="status">
+    <h3>Arti tiap status</h3>
+    <div class="tabel-bungkus">
+      <table>
+        <thead>
+          <tr><th>Status</th><th>Artinya</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="chip chip--apricot">Menunggu Persetujuan</span></td>
+            <td>Sudah masuk antrian, tapi slot belum terkunci. Panitia belum memutuskan.</td>
+          </tr>
+          <tr>
+            <td><span class="chip chip--mint">PO Fix</span> + <span class="chip chip--slate">Belum bayar</span></td>
+            <td>Disetujui, tapi slot <em>belum</em> jadi milikmu. Ada hitung mundur berjalan &mdash; segera bayar ke panitia.</td>
+          </tr>
+          <tr>
+            <td><span class="chip chip--mint">PO Fix</span> + <span class="chip chip--mint">Lunas</span></td>
+            <td>Selesai. Pembayaran sudah dikonfirmasi dan slotnya terkunci atas namamu.</td>
+          </tr>
+          <tr>
+            <td><span class="chip chip--rose">Ditolak</span></td>
+            <td>Panitia tidak bisa memproses, biasanya disertai alasan.</td>
+          </tr>
+          <tr>
+            <td><span class="chip chip--slate">Dilepas</span></td>
+            <td>Tenggat pembayaran terlewat, jadi pesanan dibatalkan otomatis. Kamu boleh pesan lagi kalau slotnya masih ada.</td>
+          </tr>
+          <tr>
+            <td><span class="chip chip--slate">Dibatalkan</span></td>
+            <td>
+              Kamu sendiri yang membatalkannya lewat tombol Batalkan &mdash; atau panitia
+              yang membatalkannya, termasuk setelah PO jadi fix. Kalau panitia yang
+              melakukannya, alasannya tertulis di kartu PO dan masuk notifikasi. Uang yang
+              sudah terlanjur dibayar dikembalikan panitia di luar aplikasi.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="catatan">
+      <strong>Papan peringkat</strong> dihitung dari total belanja PO yang
+      <em>sudah disetujui</em> saja. Pesanan yang masih menunggu belum ikut menaikkan
+      posisimu.
+    </div>
+  </section>
+
+  <section id="tanya-peserta">
+    <h3>Tanya jawab</h3>
+
+    <details>
+      <summary>Apa bedanya &ldquo;sisa slot&rdquo; dengan &ldquo;antre bayar&rdquo;?</summary>
+      <p>
+        <strong>Sisa slot</strong> adalah porsi yang belum dibayar siapa pun &mdash; itulah yang
+        benar-benar masih bisa direbut. <strong>Antre bayar</strong> adalah berapa banyak porsi
+        yang sedang diperebutkan orang lain yang belum menyelesaikan pembayaran. Kalau angka
+        antre lebih besar daripada sisa slot, artinya persaingannya ketat: yang bayar duluan
+        yang dapat.
+      </p>
+    </details>
+
+    <details>
+      <summary>Tombolnya tertulis &ldquo;Slot habis&rdquo;, masih bisa pesan?</summary>
+      <p>
+        Belum, karena semua slot sudah dibayar orang lain. Tapi bisa terbuka lagi kalau ada
+        PO yang tenggat bayarnya lewat &mdash; jadi sesekali cek lagi tab War.
+      </p>
+    </details>
+
+    <details>
+      <summary>PO saya sudah disetujui, apakah slotnya sudah aman?</summary>
+      <p>
+        Belum. Disetujui berarti panitia menerima pesananmu, tapi slotnya baru terkunci
+        setelah pembayaranmu dikonfirmasi. Selama belum dibayar, orang lain yang membayar
+        lebih dulu bisa mengambil slot itu.
+      </p>
+    </details>
+
+    <details>
+      <summary>Kenapa PO saya jadi &ldquo;Dilepas&rdquo;?</summary>
+      <p>
+        Tenggat pembayaran terlewat. Ini otomatis, bukan penolakan. Silakan pesan ulang
+        kalau slotnya masih ada.
+      </p>
+    </details>
+
+    <details>
+      <summary>Boleh pesan beberapa menu sekaligus?</summary>
+      <p>
+        Boleh. Tiap menu dipesan terpisah dan tercatat sebagai PO tersendiri. Beberapa menu
+        punya batas maksimal porsi per orang.
+      </p>
+    </details>
+
+    <details>
+      <summary>Nomor HP saya kelihatan peserta lain?</summary>
+      <p>
+        Tidak. Hanya panitia yang bisa melihat kelas dan nomor HP. Papan peringkat cuma
+        menampilkan nama, foto profil, dan total belanja.
+      </p>
+    </details>
+
+    <details>
+      <summary>Salah isi kelas atau nomor HP, bagaimana?</summary>
+      <p>
+        Buka tab <strong>Profil</strong> lalu tekan <strong>Ubah data diri</strong>. Bisa
+        diperbaiki kapan saja.
+      </p>
+    </details>
+  </section>
+</div>
+
+<!-- ============ PANITIA ============ -->
+<div class="pita pita--panitia" id="panitia">
+  <div class="wrap">
+    <p class="eyebrow">Bagian dua</p>
+    <h2>Untuk panitia</h2>
+    <p>Menyiapkan sesi, memutuskan PO yang masuk, dan membaca laporan uangnya.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section>
+    <h3>Persiapan, dilakukan sekali</h3>
+
+    <ol class="langkah">
+      <li data-n="1">
+        <h4>Buat sesi bazaar</h4>
+        <p>
+          Tab <strong>Atur</strong> &rarr; <strong>Sesi baru</strong>. Isi namanya, lalu atur
+          <strong>batas waktu bayar</strong> &mdash; berapa jam peserta punya waktu membayar
+          setelah PO disetujui, sebelum pesanannya dilepas otomatis. Bawaannya 24 jam.
+        </p>
+        <p>
+          Biarkan statusnya <span class="chip chip--slate">Draf</span> dulu supaya belum
+          terlihat peserta.
+        </p>
+      </li>
+
+      <li data-n="2">
+        <h4>Masukkan menu beserta modalnya</h4>
+        <p>
+          Tab <strong>Menu</strong> &rarr; <strong>Baru</strong>. Selain nama dan harga jual,
+          isi juga <strong>harga modal (HPP)</strong> &mdash; dari sinilah seluruh laporan laba
+          dihitung. Saat mengetik, margin dan proyeksi labanya langsung terlihat.
+        </p>
+        <p>
+          Atur jumlah slot dan batas porsi per orang. Isi <code>0</code> pada batas per
+          orang berarti tanpa batas.
+        </p>
+      </li>
+
+      <li data-n="3">
+        <h4>Buka sesinya</h4>
+        <p>
+          Kembali ke <strong>Atur</strong>, ubah status sesi jadi
+          <span class="chip chip--mint">Dibuka</span>. Saat itu juga menu muncul di tab War
+          semua peserta.
+        </p>
+      </li>
+
+      <li data-n="4">
+        <h4>Tambahkan panitia lain</h4>
+        <p>
+          Di <strong>Atur</strong> &rarr; <strong>Admin</strong>, masukkan alamat Gmail rekan
+          panitia. Kalau akunnya sudah pernah masuk, perannya langsung naik jadi admin;
+          kalau belum, otomatis jadi admin saat login pertama.
+        </p>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <h3>Saat bazaar berjalan</h3>
+
+    <ol class="langkah">
+      <li data-n="1">
+        <h4>Putuskan PO yang masuk</h4>
+        <p>
+          Tab <strong>Approval</strong> berisi antrian. Tekan <strong>Setujui</strong> atau
+          <strong>Tolak</strong> (boleh disertai alasan &mdash; alasannya ikut terkirim ke
+          pemesan). Kalau antriannya panjang, ada <strong>Setujui semua</strong>.
+        </p>
+        <p>
+          Menyetujui <em>belum</em> mengurangi sisa slot. Yang dimulai adalah hitung mundur
+          pembayaran, terlihat di tab <strong>Disetujui</strong>. Kalau berubah merah,
+          artinya kurang dari sejam lagi dan PO-nya akan dilepas otomatis.
+        </p>
+      </li>
+
+      <li data-n="2">
+        <h4>Hubungi pemesan bila perlu</h4>
+        <p>
+          Di bawah nama tertera kelas dan nomor HP. Menekan nomornya membuka WhatsApp
+          dengan sapaan yang sudah disiapkan &mdash; tidak perlu menyalin nomor manual.
+        </p>
+      </li>
+
+      <li data-n="3">
+        <h4>Konfirmasi pembayaran &mdash; inilah yang mengunci slot</h4>
+        <p>
+          Setelah PO disetujui, muncul sakelar <strong>Sudah bayar / Belum bayar</strong>
+          beserta pilihan metode (tunai, transfer, QRIS, e-wallet). Menandai lunas adalah
+          satu-satunya tindakan yang benar-benar memakai slot.
+        </p>
+        <p>
+          Kalau menandai lunas akan melebihi kapasitas menu, sistem menolaknya dan
+          memberitahu sisa slot sebenarnya. Jadi tandai lunas hanya setelah uangnya
+          benar-benar diterima.
+        </p>
+      </li>
+
+      <li data-n="4">
+        <h4>Membatalkan PO yang sudah fix</h4>
+        <p>
+          Rencana bisa berubah setelah PO disetujui: bahan tidak cukup, pemesan mundur,
+          atau ada salah input. Di kartu PO yang berstatus disetujui ada tombol
+          <strong>Batalkan PO ini</strong> &mdash; boleh disertai alasan, dan alasannya
+          ikut terkirim ke pemesan.
+        </p>
+        <p>
+          Slotnya langsung kembali tersedia dan bisa direbut peserta lain. Kalau PO-nya
+          sudah lunas, catatan pembayarannya sengaja <em>tidak</em> dihapus supaya kalian
+          punya jejak siapa yang uangnya harus dikembalikan &mdash; pengembaliannya sendiri
+          dilakukan di luar aplikasi.
+        </p>
+      </li>
+
+      <li data-n="5">
+        <h4>Catat biaya operasional</h4>
+        <p>
+          Di halaman <strong>Keuangan</strong> &rarr; <strong>Catat biaya</strong>, masukkan
+          pengeluaran di luar modal produk: transport, kemasan, sewa stand. Tanpa ini,
+          angka yang tampil baru laba <em>kotor</em>.
+        </p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="keuangan">
+    <h3>Membaca halaman Keuangan</h3>
+    <p>
+      Semua angka hanya menghitung PO yang <strong>sudah disetujui</strong>. Pesanan yang
+      masih mengantre tidak pernah masuk hitungan.
+    </p>
+
+    <div class="tabel-bungkus">
+      <table>
+        <thead>
+          <tr><th>Istilah</th><th>Cara hitungnya</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Omzet</td><td>Jumlah seluruh uang masuk dari PO yang disetujui.</td></tr>
+          <tr><td>Modal produk</td><td>Harga modal (HPP) dikali porsi yang benar-benar terjual.</td></tr>
+          <tr><td>Laba kotor</td><td>Omzet dikurangi modal produk.</td></tr>
+          <tr><td>Biaya operasional</td><td>Pengeluaran di luar bahan: transport, kemasan, sewa.</td></tr>
+          <tr><td>Laba bersih</td><td>Laba kotor dikurangi biaya operasional. Ini angka yang sebenarnya.</td></tr>
+          <tr><td>Titik impas</td><td>Berapa omzet lagi yang dibutuhkan supaya biaya operasional tertutup.</td></tr>
+          <tr><td>Piutang</td><td>Nilai PO yang sudah fix tapi uangnya belum diterima.</td></tr>
+          <tr><td>Sell-through</td><td>Berapa persen slot sebuah menu yang laku terjual.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Contoh perhitungan nyata dari satu sesi:</p>
+
+    <div class="tabel-bungkus">
+      <table>
+        <thead>
+          <tr><th>Baris</th><th class="num">Jumlah</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Omzet</td><td class="num">Rp126.000</td></tr>
+          <tr><td>Modal produk</td><td class="num">&minus; Rp73.000</td></tr>
+          <tr><td><strong>Laba kotor</strong></td><td class="num"><strong>Rp53.000</strong></td></tr>
+          <tr><td>Biaya operasional</td><td class="num">&minus; Rp40.000</td></tr>
+          <tr><td><strong>Laba bersih</strong></td><td class="num"><strong>Rp13.000</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="catatan">
+      <strong>Export.</strong> Tombol <strong>Export PDF</strong> menghasilkan laporan
+      berkop yang siap dilampirkan ke LPJ. <strong>Export Excel</strong> memberi lima
+      lembar terpisah &mdash; Ringkasan, Performa Menu, Biaya Operasional, Peserta, dan Daftar
+      PO &mdash; dengan angka yang bisa langsung dijumlahkan. Kelas dan nomor HP ikut tercetak
+      di keduanya.
+    </div>
+  </section>
+
+  <section id="aturan">
+    <h3>Aturan sistem yang perlu panitia tahu</h3>
+    <p>Beberapa hal sengaja dikunci supaya catatan keuangannya tetap bisa dipercaya.</p>
+
+    <div class="tabel-bungkus">
+      <table>
+        <thead>
+          <tr><th>Aturan</th><th>Alasannya</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Slot terpakai saat lunas, bukan saat dipesan</td>
+            <td>Beberapa orang boleh memesan porsi yang sama; yang lebih dulu dikonfirmasi bayar yang mendapatkannya. Angka &ldquo;antre bayar&rdquo; di tab War memberi tahu peserta bahwa slot itu sedang diperebutkan.</td>
+          </tr>
+          <tr>
+            <td>Slot tidak bisa kelebihan</td>
+            <td>Dijaga di sakelar pembayaran: dua panitia yang menandai lunas bersamaan akan diantre, dan yang melewati kapasitas ditolak.</td>
+          </tr>
+          <tr>
+            <td>PO yang tak dibayar dilepas sendiri</td>
+            <td>Lewat batas waktu bayar, PO berubah jadi Dilepas dan slotnya kembali tersedia. Berjalan otomatis tiap lima menit.</td>
+          </tr>
+          <tr>
+            <td>Harga dikunci saat PO dibuat</td>
+            <td>Mengubah harga menu di tengah jalan tidak mengubah laba PO yang sudah lewat.</td>
+          </tr>
+          <tr>
+            <td>HPP tidak terlihat peserta</td>
+            <td>Harga modal hanya bisa dibaca panitia, bahkan jika seseorang mencoba mengakses datanya langsung.</td>
+          </tr>
+          <tr>
+            <td>Menu yang pernah dipesan tak bisa dihapus</td>
+            <td>Menghapusnya akan merusak riwayat laporan. Pakai sakelar nonaktif di tombol Ubah.</td>
+          </tr>
+          <tr>
+            <td>Peserta wajib punya kontak</td>
+            <td>PO ditolak sistem kalau nama, kelas, atau nomor HP-nya kosong.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="masalah">
+    <h3>Kalau ada yang bermasalah</h3>
+
+    <details>
+      <summary>Peserta bilang menunya tidak muncul sama sekali</summary>
+      <p>
+        Status sesinya kemungkinan masih <span class="chip chip--slate">Draf</span> atau
+        sudah <span class="chip chip--slate">Ditutup</span>. Cek di tab Atur. Pastikan juga
+        menunya dalam keadaan aktif.
+      </p>
+    </details>
+
+    <details>
+      <summary>Peserta tidak bisa menekan Pesan Slot</summary>
+      <p>
+        Paling sering karena data dirinya belum lengkap. Minta dia membuka Profil dan
+        mengisi kelas serta nomor HP. Kemungkinan lain: seluruh slot sudah terbayar, sesi
+        tertutup, atau dia sudah kena batas porsi per orang.
+      </p>
+    </details>
+
+    <details>
+      <summary>Menandai lunas ditolak dengan pesan sisa slot tinggal sekian</summary>
+      <p>
+        Porsi yang sudah dibayar orang lain sudah memenuhi kapasitas menu itu. Ini penjagaan
+        supaya jumlah pesanan tidak melebihi yang bisa kalian buat. Tolak PO tersebut dan
+        beri tahu pemesannya, atau tambah jumlah slot menu kalau memang sanggup.
+      </p>
+    </details>
+
+    <details>
+      <summary>Rekan panitia sudah ditambahkan tapi tetap masuk sebagai peserta</summary>
+      <p>
+        Periksa ejaan alamat Gmail-nya di tab Atur &mdash; harus sama persis dengan yang dipakai
+        login. Setelah dibetulkan, dia perlu keluar lalu masuk lagi.
+      </p>
+    </details>
+
+    <details>
+      <summary>Angka keuangan terasa tidak cocok</summary>
+      <p>
+        Ingat bahwa hanya PO berstatus <span class="chip chip--mint">PO Fix</span> yang
+        dihitung. PO yang menunggu, ditolak, atau kedaluwarsa tidak pernah masuk omzet.
+        Cek juga apakah biaya operasional sudah dicatat semua.
+      </p>
+    </details>
+
+    <details>
+      <summary>Menyetujui PO lama gagal dengan pesan slot penuh</summary>
+      <p>
+        PO yang sudah kedaluwarsa memang bisa dihidupkan kembali, tapi hanya kalau slotnya
+        masih tersisa. Kalau sudah diambil orang lain, sistem menolak supaya jumlah pesanan
+        tidak melebihi kapasitas.
+      </p>
+    </details>
+  </section>
+
+  <footer>
+    Panduan ini mengikuti aplikasi Bazaar OSIS. Bila ada tampilan yang berbeda dengan
+    yang tertulis di sini, yang berlaku adalah aplikasinya &mdash; kabari panitia agar panduan
+    diperbarui.
+  </footer>
+</div>

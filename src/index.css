@@ -1,0 +1,288 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  Tema Bazaar OSIS — pastel "tones", warna yang dilembutkan abu-abu.
+  Ciri palet ini adalah lightness tinggi + chroma rendah.
+
+  Dua tingkat dipakai dengan sengaja:
+   * Token aksi (primary/destructive/warning/success) memakai versi "dusty"
+     (lightness ~0.57) supaya teks & ikon tetap terbaca di atas putih —
+     pastel murni pada teks kecil kontrasnya jatuh di bawah ambang keterbacaan.
+   * Sapuan pastel pucatnya datang dari modifier transparansi yang sudah dipakai
+     di seluruh komponen (bg-primary/15, bg-warning/15, …), jadi nuansa lembutnya
+     muncul tanpa mengorbankan kontras.
+   * Warna chart boleh pastel penuh karena dipakai sebagai bidang, bukan teks.
+*/
+:root {
+  --radius: 1rem;
+
+  --background: oklch(0.988 0.006 95); /* krem putih hangat */
+  --foreground: oklch(0.3 0.018 285); /* tinta lembut, bukan hitam pekat */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.3 0.018 285);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.3 0.018 285);
+
+  /* 0.55, bukan 0.575: pada 0.575 kontras teks harga jatuh ke 4,19:1 — di bawah
+     ambang 4,5 untuk teks 14px. Diukur, bukan dikira-kira. */
+  --primary: oklch(0.55 0.085 172); /* mint berdebu — dipakai untuk teks & ikon */
+  --primary-foreground: oklch(0.99 0.008 172);
+  /* Pasangan isi-tombol: pastel penuh + tinta gelap sewarna. Inilah yang membuat
+     tombol ikut berkarakter pastel tanpa mengorbankan keterbacaan label. */
+  --primary-soft: oklch(0.878 0.062 172);
+  --primary-ink: oklch(0.34 0.05 172);
+  --destructive-soft: oklch(0.878 0.062 20);
+  --destructive-ink: oklch(0.4 0.1 22);
+  --secondary: oklch(0.955 0.012 95);
+  --secondary-foreground: oklch(0.36 0.02 285);
+  --muted: oklch(0.958 0.01 95);
+  --muted-foreground: oklch(0.52 0.02 285);
+  --accent: oklch(0.945 0.022 172);
+  --accent-foreground: oklch(0.36 0.03 172);
+
+  --destructive: oklch(0.565 0.125 20); /* mawar berdebu */
+  --destructive-foreground: oklch(0.99 0.008 20);
+  --success: oklch(0.55 0.085 165);
+  --warning: oklch(0.555 0.095 62); /* aprikot berdebu */
+
+  --border: oklch(0.912 0.012 95);
+  --input: oklch(0.898 0.014 95);
+  --ring: oklch(0.72 0.07 172);
+
+  /* Lima keluarga warna dari kartu referensi: mawar, periwinkle, aprikot, mint, lila. */
+  --chart-1: oklch(0.775 0.088 15);
+  --chart-2: oklch(0.755 0.078 262);
+  --chart-3: oklch(0.83 0.078 62);
+  --chart-4: oklch(0.815 0.078 165);
+  --chart-5: oklch(0.78 0.072 310);
+
+  --sidebar: oklch(0.975 0.008 95);
+  --sidebar-foreground: oklch(0.3 0.018 285);
+  --sidebar-primary: oklch(0.575 0.085 172);
+  --sidebar-primary-foreground: oklch(0.99 0.008 172);
+  --sidebar-accent: oklch(0.945 0.022 172);
+  --sidebar-accent-foreground: oklch(0.36 0.03 172);
+  --sidebar-border: oklch(0.912 0.012 95);
+  --sidebar-ring: oklch(0.72 0.07 172);
+}
+
+/*
+  Varian gelap tetap disediakan untuk perangkat yang memaksa mode gelap.
+  Di sini polanya dibalik: permukaan jadi gelap lembut (bukan hitam), dan justru
+  token aksinya yang naik ke tingkat pastel penuh agar tetap kontras.
+*/
+.dark {
+  --background: oklch(0.225 0.012 285);
+  --foreground: oklch(0.945 0.008 95);
+  --card: oklch(0.268 0.014 285);
+  --card-foreground: oklch(0.945 0.008 95);
+  --popover: oklch(0.285 0.014 285);
+  --popover-foreground: oklch(0.945 0.008 95);
+
+  --primary: oklch(0.845 0.075 172);
+  --primary-foreground: oklch(0.26 0.03 172);
+  --primary-soft: oklch(0.4 0.055 172);
+  --primary-ink: oklch(0.93 0.04 172);
+  --destructive-soft: oklch(0.4 0.062 20);
+  --destructive-ink: oklch(0.93 0.05 20);
+  --secondary: oklch(0.33 0.014 285);
+  --secondary-foreground: oklch(0.93 0.008 95);
+  --muted: oklch(0.318 0.014 285);
+  --muted-foreground: oklch(0.735 0.014 95);
+  --accent: oklch(0.35 0.02 172);
+  --accent-foreground: oklch(0.93 0.008 95);
+
+  --destructive: oklch(0.775 0.1 20);
+  --destructive-foreground: oklch(0.24 0.04 20);
+  --success: oklch(0.845 0.075 165);
+  --warning: oklch(0.845 0.085 68);
+
+  --border: oklch(0.355 0.014 285);
+  --input: oklch(0.375 0.014 285);
+  --ring: oklch(0.7 0.06 172);
+
+  --chart-1: oklch(0.78 0.09 15);
+  --chart-2: oklch(0.765 0.08 262);
+  --chart-3: oklch(0.835 0.08 62);
+  --chart-4: oklch(0.82 0.08 165);
+  --chart-5: oklch(0.785 0.075 310);
+
+  --sidebar: oklch(0.248 0.012 285);
+  --sidebar-foreground: oklch(0.945 0.008 95);
+  --sidebar-primary: oklch(0.845 0.075 172);
+  --sidebar-primary-foreground: oklch(0.26 0.03 172);
+  --sidebar-accent: oklch(0.33 0.014 285);
+  --sidebar-accent-foreground: oklch(0.93 0.008 95);
+  --sidebar-border: oklch(0.355 0.014 285);
+  --sidebar-ring: oklch(0.7 0.06 172);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-ink: var(--primary-ink);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-destructive-ink: var(--destructive-ink);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans:
+    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    /* Mobile-first: cegah scroll horizontal di layar sempit. */
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
+  }
+
+  /* Angka finansial tidak boleh goyang saat berubah. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+}
+
+/* Aman untuk perangkat dengan notch / gesture bar. */
+@utility pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+
+@utility pt-safe {
+  padding-top: max(env(safe-area-inset-top), 0px);
+}
+
+/*
+  Pigura logo organisasi.
+
+  Logonya diisi belakangan oleh panitia dan bisa berbentuk apa saja, jadi yang
+  disiapkan di sini adalah wadahnya: garis tipis, sudut membulat, dan halo pastel
+  di belakang gambar. Halo dibuat dari --primary lewat color-mix supaya ikut
+  berubah kalau paletnya diganti, dan tetap terlihat di mode gelap.
+
+  Tiga gerakan, semuanya lambat dan beramplitudo kecil supaya tidak berisik:
+  pigura masuk sekali, logo mengapung, halo berdenyut. Blok
+  prefers-reduced-motion di bawah mematikan ketiganya.
+*/
+.logo-halo {
+  background: radial-gradient(
+    circle at 50% 42%,
+    color-mix(in oklab, var(--primary) 26%, transparent),
+    transparent 70%
+  );
+  opacity: 0.45;
+}
+
+.logo-pigura {
+  /* Cincin tipis sewarna aksen di luar border — memisahkan pigura dari latar krem
+     tanpa menambah garis kedua yang tegas. */
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 8%, transparent);
+}
+
+.logo-hidup {
+  animation: logo-masuk 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.logo-hidup .logo-isi {
+  animation: logo-apung 5s ease-in-out 0.6s infinite;
+}
+
+.logo-hidup .logo-halo {
+  animation: logo-denyut 4s ease-in-out infinite;
+}
+
+@keyframes logo-masuk {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes logo-apung {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes logo-denyut {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.07);
+  }
+}
+
+/* Sesuai permintaan: animasi minim. Kalau user minta reduced motion, matikan total. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
