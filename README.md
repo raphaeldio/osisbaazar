@@ -52,6 +52,50 @@ Perintah lain: `npm run build` (typecheck + build produksi), `npm run lint`, `np
 
 ---
 
+## Deploy ke Vercel
+
+Tiga hal yang harus benar. Kalau salah satunya terlewat, gejalanya **layar putih polos**
+atau login yang mentok — bukan pesan error yang menjelaskan dirinya sendiri, jadi
+daftar ini ada di sini.
+
+### 1. Environment variables
+
+Vercel **tidak** membaca `.env.local` — file itu memang tidak ikut ke repo. Isi manual di
+*Project → Settings → Environment Variables*, centang ketiga environment
+(Production, Preview, Development):
+
+```
+VITE_SUPABASE_URL=https://txlfpyjzfnrzqmiswtxc.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_Ejx1BehmHIks-7RWCdvfpw_6_Kny6kC
+```
+
+Nilainya dibaca saat **build**, bukan saat halaman dibuka — jadi setelah menambahkannya
+harus **Redeploy**; menyegarkan browser saja tidak akan mengubah apa pun.
+
+Tanpa ini `src/lib/supabase.ts` sengaja melempar error saat modul dimuat, dan React tidak
+sempat merender apa pun. Itulah layar putihnya. Buktinya selalu ada di Console browser.
+
+### 2. `vercel.json` — rewrite SPA
+
+Sudah ada di repo. Aplikasi ini memakai `BrowserRouter`, jadi URL seperti `/masuk` dan
+`/auth/callback` tidak punya file fisik di server. Tanpa rewrite ke `index.html`, Vercel
+menjawabnya dengan 404 miliknya sendiri — dan yang paling fatal, **login Google patah di
+langkah terakhir** karena Google memulangkan pengguna tepat ke `/auth/callback`.
+
+### 3. Daftarkan domain produksi di Supabase
+
+*Authentication → URL Configuration*:
+
+- **Site URL**: `https://NAMA-PROYEK.vercel.app`
+- **Redirect URLs**: tambahkan `https://NAMA-PROYEK.vercel.app/**`
+  (biarkan `http://localhost:5173/**` tetap ada supaya pengembangan lokal jalan)
+
+Yang **tidak** perlu diubah adalah Google Cloud Console: redirect URI di sana tetap
+menunjuk `https://txlfpyjzfnrzqmiswtxc.supabase.co/auth/v1/callback`, karena Google selalu
+memulangkan ke Supabase dulu, baru Supabase ke aplikasimu.
+
+---
+
 ## Yang masih harus kamu siapkan sendiri
 
 Aplikasi sudah terhubung ke project Supabase `osis-bazaar`
