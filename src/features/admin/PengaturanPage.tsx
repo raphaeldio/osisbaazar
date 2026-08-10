@@ -39,6 +39,7 @@ import { HeaderHalaman } from '@/components/HeaderHalaman'
 import { Muncul } from '@/components/Muncul'
 import { cn } from '@/lib/utils'
 import { inisial, tanggalJam } from '@/lib/format'
+import { normalkanHp } from '@/lib/profil'
 import { pesanError } from '@/lib/supabase'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useEventTerpilih } from './event-terpilih'
@@ -59,6 +60,12 @@ const skemaEvent = z.object({
       'Antara 1 dan 720 jam',
     ),
   closes_at: z.string().optional(),
+  // Tujuan transfer. Semuanya opsional — bazaar yang hanya menerima tunai boleh
+  // membiarkannya kosong, dan kartunya otomatis tidak muncul di sisi peserta.
+  payment_bank: z.string().trim().max(40).optional(),
+  payment_account: z.string().trim().max(40).optional(),
+  payment_holder: z.string().trim().max(60).optional(),
+  payment_contact: z.string().trim().max(20).optional(),
 })
 type FormEvent = z.infer<typeof skemaEvent>
 
@@ -95,6 +102,10 @@ function DialogEvent({ event, pemicu }: { event: EventRow | null; pemicu: React.
           status: event.status,
           payment_hours: String(event.payment_hours),
           closes_at: keInputLokal(event.closes_at),
+          payment_bank: event.payment_bank ?? '',
+          payment_account: event.payment_account ?? '',
+          payment_holder: event.payment_holder ?? '',
+          payment_contact: event.payment_contact ?? '',
         }
       : {
           name: '',
@@ -102,6 +113,10 @@ function DialogEvent({ event, pemicu }: { event: EventRow | null; pemicu: React.
           status: 'draft',
           payment_hours: '24',
           closes_at: '',
+          payment_bank: '',
+          payment_account: '',
+          payment_holder: '',
+          payment_contact: '',
         },
   })
 
@@ -115,6 +130,12 @@ function DialogEvent({ event, pemicu }: { event: EventRow | null; pemicu: React.
           status: nilai.status,
           payment_hours: Number(nilai.payment_hours),
           closes_at: nilai.closes_at ? new Date(nilai.closes_at).toISOString() : null,
+          // null, bukan string kosong: `adaTujuanBayar` di sisi peserta memeriksa
+          // keberadaan nilai, dan '' akan lolos lalu menampilkan kartu kosong.
+          payment_bank: nilai.payment_bank || null,
+          payment_account: nilai.payment_account || null,
+          payment_holder: nilai.payment_holder || null,
+          payment_contact: nilai.payment_contact ? normalkanHp(nilai.payment_contact) : null,
         },
       })
       toast.success(event ? 'Sesi diperbarui' : 'Sesi dibuat')
@@ -220,6 +241,82 @@ function DialogEvent({ event, pemicu }: { event: EventRow | null; pemicu: React.
                   </FormControl>
                   <FormDescription className="text-[11px]">
                     Kosongkan kalau tidak ingin batas waktu.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Separator />
+
+            <div>
+              <h3 className="text-sm font-semibold">Tujuan pembayaran</h3>
+              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                Muncul di layar <strong>PO Saya</strong> peserta yang PO-nya sudah disetujui
+                tapi belum dibayar. Kosongkan semuanya kalau bazaar kalian hanya menerima
+                tunai — kartunya otomatis tidak ditampilkan.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="payment_bank"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bank / e-wallet</FormLabel>
+                    <FormControl>
+                      <Input placeholder="BCA" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="payment_account"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nomor rekening</FormLabel>
+                    <FormControl>
+                      <Input inputMode="numeric" placeholder="1234567890" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="payment_holder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Atas nama</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Rani Ayu Lestari" {...field} />
+                  </FormControl>
+                  <FormDescription className="text-[11px]">
+                    Ditampilkan supaya peserta bisa mencocokkan sebelum mengirim uang.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="payment_contact"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nomor HP panitia</FormLabel>
+                  <FormControl>
+                    <Input type="tel" inputMode="tel" placeholder="081234567890" {...field} />
+                  </FormControl>
+                  <FormDescription className="text-[11px]">
+                    Jadi tombol WhatsApp untuk mengirim bukti transfer. Boleh diketik dengan
+                    +62 atau spasi — nanti dirapikan otomatis.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

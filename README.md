@@ -176,7 +176,15 @@ Ini bagian paling kritis, jadi dijelaskan utuh.
    menit: status jadi `expired`, slot kembali tersedia, pemesan dapat notifikasi.
 5. Omzet, modal, dan laba tetap dihitung dari PO ber-status `approved` — yang belum
    dibayar muncul sebagai **piutang**.
-6. Panitia bisa **membatalkan PO yang sudah fix** lewat `cancel_order()` — status jadi
+6. **Tujuan transfer** (bank, nomor rekening, atas nama, nomor HP panitia) disimpan per
+   sesi di `events` dan diisi lewat halaman **Pengaturan** — bukan di kode, karena
+   rekening panitia bisa berganti tiap sesi. Peserta melihatnya di layar **PO Saya**
+   begitu ada PO yang disetujui tapi belum dibayar: nomor rekening bisa disalin sekali
+   ketuk, dan nomor panitia jadi tombol WhatsApp berisi sapaan siap kirim. Kolomnya ikut
+   dibawa `v_my_orders`, jadi tujuan bayar tetap terbaca walau sesinya sudah ditutup —
+   justru di situlah tagihan yang belum lunas menumpuk. Kosongkan semuanya kalau bazaar
+   hanya menerima tunai; kartunya otomatis tidak muncul.
+7. Panitia bisa **membatalkan PO yang sudah fix** lewat `cancel_order()` — status jadi
    `cancelled`, slotnya kembali diperebutkan, dan pemesan dapat notifikasi berisi alasan.
    `payment_status` sengaja **tidak** direset: kalau uangnya sudah masuk, mengubahnya jadi
    `unpaid` akan menghapus fakta bahwa panitia berutang pengembalian. Laporan tetap aman

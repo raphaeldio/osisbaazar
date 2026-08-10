@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { HeaderHalaman } from '@/components/HeaderHalaman'
 import { GambarMenu } from '@/components/GambarMenu'
+import { InfoPembayaran, adaTujuanBayar } from '@/components/InfoPembayaran'
 import { Kosong } from '@/components/Kosong'
 import { Muncul } from '@/components/Muncul'
 import { rupiah, sisaWaktu, tanggalJam } from '@/lib/format'
@@ -183,6 +184,12 @@ export function PesananPage() {
   // Yang perlu dihitung mundur sekarang adalah tenggat bayar, bukan penahanan slot.
   const sekarang = useDetik(perluBayar.length > 0)
 
+  // Tujuan bayar ikut menempel di tiap baris v_my_orders. Diambil dari PO yang perlu
+  // dibayar dulu — kalau panitia mengganti rekening antar sesi, yang tampil adalah
+  // rekening sesi yang tagihannya sedang berjalan, bukan yang sudah lewat.
+  const infoBayar = perluBayar.find(adaTujuanBayar) ?? null
+  const totalPerluBayar = perluBayar.reduce((t, p) => t + Number(p.total_amount), 0)
+
   async function konfirmasiBatal() {
     if (!konfirmasi) return
     try {
@@ -227,6 +234,16 @@ export function PesananPage() {
               <h2 className="text-xs font-medium tracking-wide text-warning uppercase">
                 Segera bayar
               </h2>
+
+              {/* Tujuan transfer ditaruh di atas daftar tagihan, bukan di dalam tiap kartu:
+                  rekeningnya sama untuk semua PO, dan mengulangnya per kartu hanya bikin
+                  ragu — "yang mana yang benar?" */}
+              {infoBayar && (
+                <Muncul>
+                  <InfoPembayaran info={infoBayar} jumlah={rupiah(totalPerluBayar)} />
+                </Muncul>
+              )}
+
               {perluBayar.map((p, i) => (
                 <Muncul key={p.id} delay={Math.min(i * 0.03, 0.2)}>
                   <KartuPesanan pesanan={p} sekarang={sekarang} onBatal={setKonfirmasi} />

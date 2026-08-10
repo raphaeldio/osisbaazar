@@ -68,6 +68,11 @@ export type Database = {
           hold_minutes: number
           /** Batas waktu bayar (jam) setelah PO disetujui. Lewat ini, slot dilepas. */
           payment_hours: number
+          /** Tujuan transfer yang ditampilkan ke peserta. Semuanya opsional. */
+          payment_bank: string | null
+          payment_account: string | null
+          payment_holder: string | null
+          payment_contact: string | null
           opens_at: string | null
           closes_at: string | null
           created_at: string
@@ -80,6 +85,10 @@ export type Database = {
           status?: EventStatus
           hold_minutes?: number
           payment_hours?: number
+          payment_bank?: string | null
+          payment_account?: string | null
+          payment_holder?: string | null
+          payment_contact?: string | null
           opens_at?: string | null
           closes_at?: string | null
         }
@@ -89,6 +98,10 @@ export type Database = {
           status?: EventStatus
           hold_minutes?: number
           payment_hours?: number
+          payment_bank?: string | null
+          payment_account?: string | null
+          payment_holder?: string | null
+          payment_contact?: string | null
           opens_at?: string | null
           closes_at?: string | null
         }
@@ -268,6 +281,11 @@ export type Database = {
           approved_at: string | null
           created_at: string
           payment_due_at: string | null
+          /** Ikut dari sesinya, supaya tujuan bayar tetap terbaca walau sesi sudah ditutup. */
+          payment_bank: string | null
+          payment_account: string | null
+          payment_holder: string | null
+          payment_contact: string | null
         }
         Relationships: []
       }
