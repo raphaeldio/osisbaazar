@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { kunci } from '@/lib/query-client'
+import { gabungSiaran } from '@/lib/siaran'
 import type {
   EventRow,
   LeaderboardRow,
@@ -167,6 +168,13 @@ export function useSlotRealtime(eventId: string | undefined) {
   useEffect(() => {
     if (!eventId) return
 
+    // Siaran tidak langsung jadi penyegaran — lihat alasannya di `gabungSiaran`.
+    // Singkatnya: siaran diterima semua peserta bersamaan, jadi menyegarkan seketika
+    // berarti ratusan permintaan serentak untuk satu perubahan angka.
+    const penyegaran = gabungSiaran(() => {
+      void qc.invalidateQueries({ queryKey: kunci.menuTersedia(eventId) })
+    })
+
     const channel = supabase
       .channel(`slot-${eventId}`)
       .on(
@@ -177,13 +185,12 @@ export function useSlotRealtime(eventId: string | undefined) {
           table: 'slot_counters',
           filter: `event_id=eq.${eventId}`,
         },
-        () => {
-          void qc.invalidateQueries({ queryKey: kunci.menuTersedia(eventId) })
-        },
+        () => penyegaran.picu(),
       )
       .subscribe()
 
     return () => {
+      penyegaran.batalkan()
       void supabase.removeChannel(channel)
     }
   }, [eventId, qc])

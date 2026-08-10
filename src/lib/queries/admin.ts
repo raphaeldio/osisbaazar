@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { kunci } from '@/lib/query-client'
+import { gabungSiaran } from '@/lib/siaran'
 import type {
   DailyFinance,
   EventFinancials,
@@ -364,19 +365,30 @@ export function useOrdersRealtime(eventId: string | undefined) {
   useEffect(() => {
     if (!eventId) return
 
+    // Admin mendengarkan `orders` langsung, jadi saat war ia menerima satu siaran per
+    // PO yang masuk — dan query antrian approval jauh lebih berat daripada query menu
+    // (ikut menarik profil pemesan dan nama menu). Jendelanya dibuat lebih lebar dari
+    // sisi peserta: panitia tidak perlu melihat tiap PO detik itu juga, dan yang
+    // dihemat di sini adalah query paling mahal di seluruh aplikasi.
+    const penyegaran = gabungSiaran(
+      () => {
+        void qc.invalidateQueries({ queryKey: kunci.ordersAdmin(eventId) })
+        void qc.invalidateQueries({ queryKey: kunci.keuangan(eventId) })
+      },
+      { jendela: 1200, acak: 600 },
+    )
+
     const channel = supabase
       .channel(`orders-admin-${eventId}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'orders', filter: `event_id=eq.${eventId}` },
-        () => {
-          void qc.invalidateQueries({ queryKey: kunci.ordersAdmin(eventId) })
-          void qc.invalidateQueries({ queryKey: kunci.keuangan(eventId) })
-        },
+        () => penyegaran.picu(),
       )
       .subscribe()
 
     return () => {
+      penyegaran.batalkan()
       void supabase.removeChannel(channel)
     }
   }, [eventId, qc])

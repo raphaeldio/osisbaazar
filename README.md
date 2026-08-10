@@ -205,6 +205,51 @@ itu menolak panggilan dari non-admin.
 
 ---
 
+## Bertahan saat war ramai
+
+Bagian ini ada karena beban aplikasi war tidak naik lurus terhadap jumlah peserta —
+kalau tidak dijaga, ia naik **kuadrat**. Satu PO masuk memicu satu siaran realtime, dan
+satu siaran diterima *semua* peserta yang sedang membuka tab War. Dengan 900 peserta,
+400 PO dalam dua menit pernah berarti 360.000 permintaan (~3.000 per detik) — jauh di
+atas kemampuan compute mana pun yang masuk akal untuk bazaar sekolah.
+
+Tiga rem dipasang, dan ketiganya bekerja di lapisan berbeda:
+
+**1. Siaran yang tidak membawa informasi tidak dikirim** (`0013_hemat_siaran_slot.sql`).
+Trigger `refresh_slot_counter()` hanya menulis kalau `slots_taken` benar-benar berubah:
+
+```sql
+on conflict (menu_item_id) do update set ...
+  where slot_counters.slots_taken is distinct from excluded.slots_taken
+```
+
+Karena PO `pending` tidak memakai slot, seluruh badai PO saat war kini **tidak
+menyiarkan apa pun**. Siaran hanya terjadi saat panitia menandai lunas — puluhan kali,
+bukan ratusan per menit. Ini sendirian memangkas beban puncak lebih dari 90%.
+
+**2. Siaran yang beruntun digabung, dan waktunya diacak** ([`src/lib/siaran.ts`](src/lib/siaran.ts)).
+Sepuluh siaran dalam dua detik jadi satu penyegaran. Yang sama pentingnya: jedanya diberi
+komponen acak 700–1500 ms, karena siaran diterima semua peserta pada milidetik yang sama —
+tanpa pengacakan, 900 permintaan akan menghantam dalam satu detak.
+
+Polanya sengaja **"yang pertama menjadwalkan, sisanya menumpang"**, bukan debounce yang
+me-reset hitungan. Debounce berbahaya di sini: saat war siarannya nyaris tak putus,
+hitungannya akan terus di-reset dan layar peserta justru tidak pernah ter-update.
+
+**3. `staleTime` 30 detik** ([`src/lib/query-client.ts`](src/lib/query-client.ts)).
+`refetchOnWindowFocus` menghormati `staleTime`, jadi angka ini adalah batas atas beban
+dari peserta yang bolak-balik ke WhatsApp lalu kembali.
+
+Konsekuensi yang disadari: angka **"N antre bayar"** tidak lagi berubah seketika,
+melainkan ikut penyegaran biasa. **Sisa slot tetap seketika** — dan itu yang penting,
+karena sisa slot hanya berubah ketika pembayaran dikonfirmasi.
+
+Yang **tidak** bisa diperbaiki dari kode: plan Free membatasi koneksi Realtime bersamaan
+(sekitar 200). Di atas itu, peserta ke-201 dan seterusnya tidak menerima siaran sama
+sekali. Untuk 900 peserta serentak, naikkan plan sehari sebelum acara lalu turunkan lagi.
+
+---
+
 ## Keamanan data
 
 | Aturan | Cara penegakannya |
@@ -260,7 +305,7 @@ src/
                       KeuanganPage · PesertaPage · PengaturanPage · event-terpilih
   components/ui/        shadcn/ui
   components/reactbits/ React Bits (CountUp · AnimatedList · SpotlightCard), disesuaikan
-supabase/migrations/    0001–0011, urut dan bisa dijalankan ulang
+supabase/migrations/    0001–0013, urut dan bisa dijalankan ulang
 ```
 
 Regenerate tipe setelah mengubah skema:
