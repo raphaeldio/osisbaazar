@@ -16,6 +16,14 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { DAFTAR_KELAS } from '@/lib/kelas'
 import { inisial } from '@/lib/format'
 import { pesanError } from '@/lib/supabase'
 import { normalkanHp, profilLengkap, skemaProfil, type FormProfil } from '@/lib/profil'
@@ -115,15 +123,51 @@ export function LengkapiProfilPage() {
             <FormField
               control={form.control}
               name="class_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Kelas</FormLabel>
-                  <FormControl>
-                    <Input placeholder="XI IPA 2" autoCapitalize="characters" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                // Kelas yang sudah tersimpan tapi tidak ada di daftar tetap ditawarkan.
+                // Tanpa ini, membuka "Ubah data diri" akan terlihat seolah kelasnya
+                // kosong padahal terisi — lalu ikut terhapus begitu disimpan.
+                const pilihan =
+                  field.value && !DAFTAR_KELAS.includes(field.value)
+                    ? [field.value, ...DAFTAR_KELAS]
+                    : DAFTAR_KELAS
+
+                return (
+                  <FormItem>
+                    <FormLabel>Kelas</FormLabel>
+
+                    {pilihan.length === 0 ? (
+                      // Daftar kelas belum diisi panitia. Sengaja tidak menampilkan
+                      // dropdown kosong: itu akan mengunci semua orang di layar ini.
+                      <>
+                        <FormControl>
+                          <Input placeholder="XI IPA 2" autoCapitalize="characters" {...field} />
+                        </FormControl>
+                        <FormDescription className="text-[11px]">
+                          Ketik sesuai kelasmu, mis. XI IPA 2.
+                        </FormDescription>
+                      </>
+                    ) : (
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Pilih kelasmu" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {pilihan.map((kelas) => (
+                            <SelectItem key={kelas} value={kelas}>
+                              {kelas}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+
+                    <FormMessage />
+                  </FormItem>
+                )
+              }}
             />
 
             <FormField
