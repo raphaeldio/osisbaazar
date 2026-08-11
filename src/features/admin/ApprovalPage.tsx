@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { Ban, CheckCheck, ClipboardCheck, Loader2 } from 'lucide-react'
+import { Ban, CheckCheck, ClipboardCheck, Loader2, Wallet } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -44,7 +44,7 @@ import {
 } from '@/lib/queries/admin'
 import type { PaymentMethod } from '@/types/database'
 
-type Saringan = 'pending' | 'approved' | 'rejected' | 'semua'
+type Saringan = 'pending' | 'approved' | 'lunas' | 'rejected' | 'semua'
 /** Dua keputusan negatif dengan bentuk dialog yang sama: menolak PO baru vs membatalkan PO fix. */
 type Sasaran = { order: AdminOrder; mode: 'tolak' | 'batal' }
 
@@ -360,6 +360,10 @@ export function ApprovalPage() {
     if (saringan === 'semua') return semua
     if (saringan === 'rejected')
       return semua.filter((o) => o.status === 'rejected' || o.status === 'expired' || o.status === 'cancelled')
+    // "Lunas" adalah bagian dari "Disetujui", bukan penggantinya: PO yang sudah dibayar
+    // tetap muncul di kedua tab. Yang satu daftar kerja, yang satu arsip pembuktian.
+    if (saringan === 'lunas')
+      return semua.filter((o) => o.status === 'approved' && o.payment_status === 'paid')
     return semua.filter((o) => o.status === saringan)
   }, [orders, saringan])
 
@@ -368,7 +372,12 @@ export function ApprovalPage() {
   const menunggu = orders?.filter((o) => o.status === 'pending') ?? []
   const menungguBayar =
     orders?.filter((o) => o.status === 'approved' && o.payment_status === 'unpaid') ?? []
+  const lunas = orders?.filter((o) => o.status === 'approved' && o.payment_status === 'paid') ?? []
   const sekarang = useDetik(menungguBayar.length > 0)
+
+  // Nilai uang yang sudah benar-benar masuk. Ditampilkan di tab Lunas karena di situlah
+  // pertanyaannya muncul: "sudah terkumpul berapa?" — tanpa perlu pindah ke Keuangan.
+  const totalLunas = lunas.reduce((t, o) => t + Number(o.total_amount), 0)
 
   async function konfirmasi() {
     if (!sasaran) return
@@ -402,20 +411,31 @@ export function ApprovalPage() {
       <HeaderHalaman judul="Approval PO" keterangan={event?.name} aksi={<PemilihEvent />} />
 
       <Tabs value={saringan} onValueChange={(v) => setSaringan(v as Saringan)} className="mb-4">
-        <TabsList className="w-full">
-          <TabsTrigger value="pending" className="text-xs">
-            Menunggu{menunggu.length > 0 && ` (${menunggu.length})`}
-          </TabsTrigger>
-          <TabsTrigger value="approved" className="text-xs">
-            Disetujui{menungguBayar.length > 0 && ` (${menungguBayar.length})`}
-          </TabsTrigger>
-          <TabsTrigger value="rejected" className="text-xs">
-            Batal
-          </TabsTrigger>
-          <TabsTrigger value="semua" className="text-xs">
-            Semua
-          </TabsTrigger>
-        </TabsList>
+        {/*
+          Bisa digeser mendatar. Lima tab beserta angkanya butuh ~354px, sedangkan HP
+          375px hanya menyediakan 337px — dan HP 320px jauh lebih sempit lagi. Memaksakan
+          `w-full` akan memotong label; menggeser jauh lebih baik daripada menebak-nebak
+          singkatan. `-mx-4 px-4` membuatnya menyentuh tepi layar supaya jelas bisa digeser.
+        */}
+        <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <TabsList className="w-max min-w-full">
+            <TabsTrigger value="pending" className="text-xs">
+              Menunggu{menunggu.length > 0 && ` (${menunggu.length})`}
+            </TabsTrigger>
+            <TabsTrigger value="approved" className="text-xs">
+              Disetujui{menungguBayar.length > 0 && ` (${menungguBayar.length})`}
+            </TabsTrigger>
+            <TabsTrigger value="lunas" className="text-xs">
+              Lunas{lunas.length > 0 && ` (${lunas.length})`}
+            </TabsTrigger>
+            <TabsTrigger value="rejected" className="text-xs">
+              Batal
+            </TabsTrigger>
+            <TabsTrigger value="semua" className="text-xs">
+              Semua
+            </TabsTrigger>
+          </TabsList>
+        </div>
       </Tabs>
 
       {saringan === 'pending' && menunggu.length > 1 && (
@@ -442,18 +462,34 @@ export function ApprovalPage() {
         </div>
       ) : kelompok.length === 0 ? (
         <Kosong
-          icon={ClipboardCheck}
-          judul={saringan === 'pending' ? 'Tidak ada yang menunggu' : 'Belum ada data'}
+          icon={saringan === 'lunas' ? Wallet : ClipboardCheck}
+          judul={
+            saringan === 'pending'
+              ? 'Tidak ada yang menunggu'
+              : saringan === 'lunas'
+                ? 'Belum ada yang lunas'
+                : 'Belum ada data'
+          }
           keterangan={
             saringan === 'pending'
               ? 'Semua PO sudah kamu putuskan. Kerja bagus.'
-              : 'Coba pilih saringan lain.'
+              : saringan === 'lunas'
+                ? 'PO akan muncul di sini setelah kamu menggeser sakelar "Sudah bayar".'
+                : 'Coba pilih saringan lain.'
           }
         />
       ) : (
         <>
           <p className="mb-2.5 text-[11px] text-muted-foreground">
             {kelompok.length} peserta · {daftar.length} PO
+            {saringan === 'lunas' && (
+              <>
+                {' · '}
+                <span className="tabular font-medium text-primary">
+                  {rupiah(totalLunas)} terkumpul
+                </span>
+              </>
+            )}
           </p>
           <div className="space-y-3">
             {kelompok.map((k, i) => (
