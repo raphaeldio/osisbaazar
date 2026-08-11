@@ -224,6 +224,12 @@ function DialogEvent({ event, pemicu }: { event: EventRow | null; pemicu: React.
                     Dihitung sejak PO disetujui. Slot baru terkunci setelah kamu menandai
                     pembayarannya lunas; kalau lewat batas ini belum dibayar, PO dilepas
                     otomatis dan slotnya kembali tersedia.
+                    <br />
+                    <strong>Mengubah angka ini berlaku surut</strong> — seluruh PO yang
+                    belum dibayar langsung ikut dihitung ulang dari waktu persetujuannya
+                    masing-masing, dan hitung mundur di layar peserta berubah saat itu juga.
+                    Hati-hati memperpendek: PO yang jadinya sudah lewat batas akan dilepas
+                    dalam lima menit berikutnya.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

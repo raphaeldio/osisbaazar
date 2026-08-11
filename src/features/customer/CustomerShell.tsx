@@ -4,7 +4,12 @@ import { toast } from 'sonner'
 import { Flame, ReceiptText, Trophy, User } from 'lucide-react'
 import { NavBawah, type ItemNav } from '@/components/NavBawah'
 import { useAuth } from '@/features/auth/AuthProvider'
-import { useNotifikasi, useNotifikasiRealtime, usePesananSaya } from '@/lib/queries/customer'
+import {
+  useEventRealtime,
+  useNotifikasi,
+  useNotifikasiRealtime,
+  usePesananSaya,
+} from '@/lib/queries/customer'
 import type { NotificationRow } from '@/types/database'
 
 export function CustomerShell() {
@@ -23,6 +28,9 @@ export function CustomerShell() {
   }, [])
 
   useNotifikasiRealtime(session?.user.id, onNotifikasiBaru)
+  // Dipasang di shell, bukan di PesananPage: hitung mundur tenggat bayar juga muncul
+  // di lencana tab, dan peserta bisa sedang membuka tab War saat panitia mengubahnya.
+  useEventRealtime()
 
   const item: ItemNav[] = [
     { ke: '/', label: 'War', icon: Flame, persis: true },

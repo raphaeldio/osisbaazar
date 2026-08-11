@@ -196,6 +196,90 @@ export function useSlotRealtime(eventId: string | undefined) {
   }, [eventId, qc])
 }
 
+/**
+ * Perubahan pada sesi bazaar ikut hidup di layar peserta.
+ *
+ * Yang paling terasa: panitia mengubah **batas waktu bayar**. Trigger di database
+ * menyelaraskan `payment_due_at` seluruh PO yang belum lunas, dan siaran ini yang
+ * membuat hitung mundur di layar peserta ikut berubah tanpa perlu refresh.
+ *
+ * Kenapa mendengarkan `events` dan bukan `orders`: Realtime menghormati RLS, dan
+ * customer memang tidak punya izin baca `orders` — event dari tabel itu tidak akan
+ * pernah sampai ke mereka. `events` boleh dibaca semua user yang sudah login.
+ *
+ * Tanpa filter `event_id` dengan sengaja: PO lama bisa milik sesi yang sudah ditutup,
+ * dan tabel `events` isinya cuma segelintir baris yang jarang berubah.
+ */
+export function useEventRealtime() {
+  const qc = useQueryClient()
+
+  useEffect(() => {
+    /*
+     * Penyegaran lewat jaringan sengaja dibuat lambat dan sangat teracak (1,5–7,5 detik).
+     * Boleh lambat karena angka di layar sudah diperbarui seketika oleh `terapkanTenggat`
+     * di bawah — permintaan ini hanya untuk merapikan sisanya (status sesi berubah,
+     * rekening diganti). Kalau 900 peserta menyegarkan serentak begitu panitia menyentuh
+     * satu angka, kita cuma memindahkan badai yang sudah ditambal di migrasi 0013.
+     */
+    const penyegaran = gabungSiaran(
+      () => {
+        void qc.invalidateQueries({ queryKey: kunci.pesananSaya })
+        void qc.invalidateQueries({ queryKey: kunci.eventAktif })
+      },
+      { jendela: 1500, acak: 6000 },
+    )
+
+    const channel = supabase
+      .channel('events-peserta')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'events' },
+        (payload) => {
+          const sesi = payload.new as { id?: string; payment_hours?: number }
+          if (sesi?.id && typeof sesi.payment_hours === 'number') {
+            terapkanTenggat(qc, sesi.id, sesi.payment_hours)
+          }
+          penyegaran.picu()
+        },
+      )
+      .subscribe()
+
+    return () => {
+      penyegaran.batalkan()
+      void supabase.removeChannel(channel)
+    }
+  }, [qc])
+}
+
+/**
+ * Memperbarui hitung mundur di cache langsung dari isi siaran — tanpa permintaan baru.
+ *
+ * Payload realtime sudah membawa `payment_hours` yang baru, dan setiap PO sudah memuat
+ * `approved_at`. Jadi tenggatnya bisa dihitung di sini, dan layar peserta berubah dalam
+ * hitungan milidetik alih-alih menunggu satu putaran ke server. Dengan ratusan peserta
+ * online, ini bedanya antara nol permintaan dan ratusan permintaan serentak.
+ *
+ * CERMINAN dari trigger `selaraskan_tenggat_bayar()` di `0014_tenggat_ikut_berubah.sql` —
+ * rumusnya (`approved_at + payment_hours`, hanya untuk PO approved+unpaid) harus sama
+ * persis. Kalau salah satunya diubah, ubah keduanya. Angka dari server tetap yang
+ * menang: penyegaran yang menyusul akan menimpanya.
+ */
+function terapkanTenggat(
+  qc: ReturnType<typeof useQueryClient>,
+  eventId: string,
+  paymentHours: number,
+) {
+  qc.setQueryData<MyOrder[]>(kunci.pesananSaya, (lama) =>
+    lama?.map((p) => {
+      if (p.event_id !== eventId) return p
+      if (p.status !== 'approved' || p.payment_status !== 'unpaid') return p
+
+      const mulai = new Date(p.approved_at ?? p.created_at).getTime()
+      return { ...p, payment_due_at: new Date(mulai + paymentHours * 3_600_000).toISOString() }
+    }),
+  )
+}
+
 /** Notifikasi masuk realtime; dipakai untuk memunculkan toast di shell customer. */
 export function useNotifikasiRealtime(userId: string | undefined, onBaru: (n: NotificationRow) => void) {
   const qc = useQueryClient()

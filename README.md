@@ -174,6 +174,11 @@ Ini bagian paling kritis, jadi dijelaskan utuh.
    slot benar-benar berpindah tangan.
 4. Lewat tenggat dan belum dibayar → `pg_cron` menjalankan `expire_unpaid()` tiap lima
    menit: status jadi `expired`, slot kembali tersedia, pemesan dapat notifikasi.
+   Mengubah `payment_hours` **berlaku surut**: trigger `selaraskan_tenggat_bayar()`
+   menghitung ulang seluruh PO yang belum lunas dari `approved_at` masing-masing — bukan
+   dari sekarang, supaya menyentuh angka itu tidak diam-diam memberi perpanjangan penuh
+   kepada yang sudah menunggak. Memperpendek bisa membuat sebagian PO langsung lewat
+   batas; peringatannya ada di form Pengaturan.
 5. Omzet, modal, dan laba tetap dihitung dari PO ber-status `approved` — yang belum
    dibayar muncul sebagai **piutang**.
 6. **Tujuan transfer** (bank, nomor rekening, atas nama, nomor HP panitia) disimpan per
@@ -235,6 +240,15 @@ tanpa pengacakan, 900 permintaan akan menghantam dalam satu detak.
 Polanya sengaja **"yang pertama menjadwalkan, sisanya menumpang"**, bukan debounce yang
 me-reset hitungan. Debounce berbahaya di sini: saat war siarannya nyaris tak putus,
 hitungannya akan terus di-reset dan layar peserta justru tidak pernah ter-update.
+
+**2b. Perubahan yang datanya sudah ada di siaran tidak perlu ditanyakan lagi.**
+Saat panitia mengubah batas waktu bayar, payload realtime `events` sudah memuat
+`payment_hours` yang baru — dan tiap PO sudah memuat `approved_at`. Jadi hitung mundur
+di layar peserta dihitung ulang langsung dari cache (`terapkanTenggat` di
+[`customer.ts`](src/lib/queries/customer.ts)), **nol permintaan**. Penyegaran lewat
+jaringan tetap dijadwalkan untuk merapikan sisanya, tapi dibuat lambat dan sangat teracak
+(1,5–7,5 detik) karena layarnya sudah benar duluan. Rumusnya adalah cerminan trigger
+`selaraskan_tenggat_bayar()` — kalau salah satu diubah, ubah keduanya.
 
 **3. `staleTime` 30 detik** ([`src/lib/query-client.ts`](src/lib/query-client.ts)).
 `refetchOnWindowFocus` menghormati `staleTime`, jadi angka ini adalah batas atas beban
