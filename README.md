@@ -327,6 +327,13 @@ npx supabase gen types typescript --project-id txlfpyjzfnrzqmiswtxc > src/types/
   memakai pasangan `--primary-soft` (isi pastel) + `--primary-ink` (tinta gelap sewarna).
   Semua kombinasi teks sudah diukur dan lolos ambang kontras 4,5:1 — pastel murni pada
   teks kecil jatuh di bawah ambang itu, jadi angkanya dicek, bukan dikira-kira.
+- **Approval dikelompokkan per pemesan**, bukan daftar PO datar
+  ([`src/lib/kelompok.ts`](src/lib/kelompok.ts)). Peserta sering memesan beberapa kali
+  terpisah, dan tanpa pengelompokan panitia harus mengingat sendiri bahwa dua baris
+  berjauhan adalah orang yang sama — lalu menagihnya dua kali. Kartu kelompok memuat
+  total belanja dan **berapa yang belum dibayar**, jadi satu orang = satu tagihan dan
+  satu percakapan WhatsApp. Pengelompokan dilakukan *setelah* penyaringan tab, supaya
+  angka di tab "Menunggu" hanya bicara soal PO yang menunggu.
 - **Animasi sengaja minim.** Satu pola saja: fade + geser 8px selama 220ms, plus
   CountUp pada angka saldo. `prefers-reduced-motion` mematikan semuanya.
 - **Code splitting.** Dashboard admin dan library export dimuat terpisah, supaya

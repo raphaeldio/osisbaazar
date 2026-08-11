@@ -30,6 +30,7 @@ import { Muncul } from '@/components/Muncul'
 import { cn } from '@/lib/utils'
 import { inisial, rupiah, sisaWaktu, tanggalJam } from '@/lib/format'
 import { useDetik } from '@/lib/use-detik'
+import { kelompokkanPO, type Kelompok } from '@/lib/kelompok'
 import { pesanError } from '@/lib/supabase'
 import { useEventTerpilih } from './event-terpilih'
 import { PemilihEvent } from './PemilihEvent'
@@ -54,6 +55,32 @@ const metodeBayar: { nilai: PaymentMethod; label: string }[] = [
   { nilai: 'ewallet', label: 'E-wallet' },
 ]
 
+/**
+ * Menyetujui berurutan, bukan paralel: `approve_order` mengecek ulang kapasitas dan
+ * mengunci baris menu, jadi menembak bersamaan hanya menghasilkan antre kunci.
+ */
+async function setujuiBerurutan(
+  daftar: AdminOrder[],
+  jalankan: (id: string) => Promise<unknown>,
+) {
+  let berhasil = 0
+  const gagal: string[] = []
+  for (const o of daftar) {
+    try {
+      await jalankan(o.id)
+      berhasil += 1
+    } catch (e) {
+      gagal.push(`${o.menu?.name}: ${pesanError(e)}`)
+    }
+  }
+  return { berhasil, gagal }
+}
+
+function laporkanMassal({ berhasil, gagal }: { berhasil: number; gagal: string[] }) {
+  if (berhasil > 0) toast.success(`${berhasil} PO disetujui`)
+  if (gagal.length > 0) toast.error(`${gagal.length} PO gagal`, { description: gagal[0] })
+}
+
 function KontrolPembayaran({ order }: { order: AdminOrder }) {
   const setBayar = useSetPembayaran()
   const lunas = order.payment_status === 'paid'
@@ -67,7 +94,7 @@ function KontrolPembayaran({ order }: { order: AdminOrder }) {
   }
 
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-muted/50 px-3 py-2">
+    <div className="mt-2.5 flex flex-wrap items-center gap-2 rounded-xl bg-muted/50 px-3 py-2">
       <label className="flex flex-1 cursor-pointer items-center gap-2 text-xs">
         <Switch
           checked={lunas}
@@ -100,7 +127,8 @@ function KontrolPembayaran({ order }: { order: AdminOrder }) {
   )
 }
 
-function KartuPO({
+/** Satu PO di dalam kelompok. Identitas pemesan tidak diulang — sudah ada di kepala kartu. */
+function BarisPO({
   order,
   sekarang,
   onTolak,
@@ -130,78 +158,53 @@ function KartuPO({
   }
 
   return (
-    <article className="rounded-2xl border border-border bg-card p-3">
-      <div className="flex gap-3">
-        <Avatar className="size-9 shrink-0">
-          <AvatarImage src={order.pemesan?.avatar_url ?? undefined} alt="" />
-          <AvatarFallback className="text-[10px]">
-            {inisial(order.pemesan?.full_name)}
-          </AvatarFallback>
-        </Avatar>
+    <li className="py-3 first:pt-0 last:pb-0">
+      <div className="flex items-start justify-between gap-2">
+        <p className="min-w-0 flex-1 text-xs">
+          <span className="font-medium">{order.menu?.name}</span>
+          <span className="text-muted-foreground"> × {order.quantity}</span>
+        </p>
+        <span className="tabular shrink-0 text-xs font-semibold">
+          {rupiah(order.total_amount)}
+        </span>
+      </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">
-                {order.pemesan?.full_name ?? 'Pengguna'}
-              </p>
-              <p className="truncate text-[11px] text-muted-foreground">
-                {order.pemesan?.email}
-              </p>
-            </div>
-            <span className="tabular shrink-0 text-sm font-semibold">
-              {rupiah(order.total_amount)}
-            </span>
-          </div>
+      {order.notes && (
+        <p className="mt-1 text-[11px] text-muted-foreground">Catatan: {order.notes}</p>
+      )}
 
-          <div className="mt-1.5">
-            <KontakPeserta
-              kelas={order.pemesan?.class_name ?? null}
-              phone={order.pemesan?.phone ?? null}
-              nama={order.pemesan?.full_name}
-            />
-          </div>
-
-          <p className="mt-1.5 truncate text-xs">
-            <span className="font-medium">{order.menu?.name}</span>
-            <span className="text-muted-foreground"> × {order.quantity}</span>
-          </p>
-
-          {order.notes && (
-            <p className="mt-1 text-[11px] text-muted-foreground">Catatan: {order.notes}</p>
-          )}
-
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] text-muted-foreground">
-              {tanggalJam(order.created_at)}
-            </span>
-            {sisaBayar && (
-              <Badge
-                className={cn(
-                  'tabular',
-                  hampirHabis
-                    ? 'bg-destructive/15 text-destructive hover:bg-destructive/15'
-                    : 'bg-warning/15 text-warning hover:bg-warning/15',
-                )}
-              >
-                bayar dalam {sisaBayar}
-              </Badge>
+      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+        <span className="text-[11px] text-muted-foreground">{tanggalJam(order.created_at)}</span>
+        {sisaBayar && (
+          <Badge
+            className={cn(
+              'tabular',
+              hampirHabis
+                ? 'bg-destructive/15 text-destructive hover:bg-destructive/15'
+                : 'bg-warning/15 text-warning hover:bg-warning/15',
             )}
-            {(order.status === 'rejected' || order.status === 'expired') &&
-              order.rejection_reason && (
-              <span className="text-[11px] text-destructive">{order.rejection_reason}</span>
-            )}
-          </div>
-        </div>
+          >
+            bayar dalam {sisaBayar}
+          </Badge>
+        )}
+        {(order.status === 'rejected' || order.status === 'expired' ||
+          order.status === 'cancelled') && order.rejection_reason && (
+          <span className="text-[11px] text-destructive">{order.rejection_reason}</span>
+        )}
       </div>
 
       {order.status === 'pending' && (
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <Button size="sm" className="h-9" onClick={setuju} disabled={setujui.isPending}>
+        <div className="mt-2.5 grid grid-cols-2 gap-2">
+          <Button size="sm" className="h-8 text-xs" onClick={setuju} disabled={setujui.isPending}>
             {setujui.isPending && <Loader2 className="size-3.5 animate-spin" />}
             Setujui
           </Button>
-          <Button size="sm" variant="outline" className="h-9" onClick={() => onTolak(order)}>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs"
+            onClick={() => onTolak(order)}
+          >
             Tolak
           </Button>
         </div>
@@ -228,7 +231,7 @@ function KartuPO({
         <Button
           size="sm"
           variant="outline"
-          className="mt-3 h-8 w-full text-xs"
+          className="mt-2.5 h-8 w-full text-xs"
           onClick={setuju}
           disabled={setujui.isPending}
         >
@@ -236,6 +239,106 @@ function KartuPO({
           Hidupkan &amp; setujui
         </Button>
       )}
+    </li>
+  )
+}
+
+function KartuKelompok({
+  kelompok,
+  sekarang,
+  onTolak,
+  onBatal,
+}: {
+  kelompok: Kelompok
+  sekarang: number
+  onTolak: (o: AdminOrder) => void
+  onBatal: (o: AdminOrder) => void
+}) {
+  const setujui = useSetujuiPO()
+  const [proses, setProses] = useState(false)
+
+  async function setujuiSemuaMiliknya() {
+    setProses(true)
+    laporkanMassal(await setujuiBerurutan(kelompok.menunggu, (id) => setujui.mutateAsync(id)))
+    setProses(false)
+  }
+
+  return (
+    <article className="overflow-hidden rounded-2xl border border-border bg-card">
+      <header className="flex gap-3 border-b border-border p-3">
+        <Avatar className="size-9 shrink-0">
+          <AvatarImage src={kelompok.pemesan?.avatar_url ?? undefined} alt="" />
+          <AvatarFallback className="text-[10px]">
+            {inisial(kelompok.pemesan?.full_name)}
+          </AvatarFallback>
+        </Avatar>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium">
+                {kelompok.pemesan?.full_name ?? 'Pengguna'}
+              </p>
+              <p className="truncate text-[11px] text-muted-foreground">
+                {kelompok.pemesan?.email}
+              </p>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="tabular text-sm font-semibold">{rupiah(kelompok.total)}</p>
+              <p className="tabular text-[11px] text-muted-foreground">
+                {kelompok.orders.length} PO
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-1.5">
+            <KontakPeserta
+              kelas={kelompok.pemesan?.class_name ?? null}
+              phone={kelompok.pemesan?.phone ?? null}
+              nama={kelompok.pemesan?.full_name}
+            />
+          </div>
+
+          {/* Angka tagihan gabungan: inilah gunanya pengelompokan — panitia menagih
+              sekali dengan satu nominal, bukan menjumlahkan sendiri dari kartu terpisah. */}
+          {kelompok.belumDibayar > 0 && (
+            <p className="tabular mt-1.5 text-[11px] font-medium text-warning">
+              {rupiah(kelompok.belumDibayar)} belum dibayar
+            </p>
+          )}
+        </div>
+      </header>
+
+      {kelompok.menunggu.length > 1 && (
+        <div className="border-b border-border px-3 py-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 w-full gap-1.5 text-xs"
+            onClick={setujuiSemuaMiliknya}
+            disabled={proses}
+          >
+            {proses ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <CheckCheck className="size-3.5" />
+            )}
+            Setujui {kelompok.menunggu.length} PO orang ini
+          </Button>
+        </div>
+      )}
+
+      <ul className="divide-y divide-border px-3 py-3">
+        {kelompok.orders.map((o) => (
+          <BarisPO
+            key={o.id}
+            order={o}
+            sekarang={sekarang}
+            onTolak={onTolak}
+            onBatal={onBatal}
+          />
+        ))}
+      </ul>
     </article>
   )
 }
@@ -259,6 +362,8 @@ export function ApprovalPage() {
       return semua.filter((o) => o.status === 'rejected' || o.status === 'expired' || o.status === 'cancelled')
     return semua.filter((o) => o.status === saringan)
   }, [orders, saringan])
+
+  const kelompok = useMemo(() => kelompokkanPO(daftar), [daftar])
 
   const menunggu = orders?.filter((o) => o.status === 'pending') ?? []
   const menungguBayar =
@@ -288,21 +393,8 @@ export function ApprovalPage() {
 
   async function setujuiSemua() {
     setProsesMassal(true)
-    let berhasil = 0
-    const gagal: string[] = []
-    // Berurutan, bukan paralel: reserve_slot mengunci baris menu, dan approve
-    // mengecek ulang kapasitas — menembak bersamaan hanya memicu antre kunci.
-    for (const o of menunggu) {
-      try {
-        await setujui.mutateAsync(o.id)
-        berhasil += 1
-      } catch (e) {
-        gagal.push(`${o.menu?.name}: ${pesanError(e)}`)
-      }
-    }
+    laporkanMassal(await setujuiBerurutan(menunggu, (id) => setujui.mutateAsync(id)))
     setProsesMassal(false)
-    if (berhasil > 0) toast.success(`${berhasil} PO disetujui`)
-    if (gagal.length > 0) toast.error(`${gagal.length} PO gagal`, { description: gagal[0] })
   }
 
   return (
@@ -348,7 +440,7 @@ export function ApprovalPage() {
             <Skeleton key={i} className="h-28 rounded-2xl" />
           ))}
         </div>
-      ) : daftar.length === 0 ? (
+      ) : kelompok.length === 0 ? (
         <Kosong
           icon={ClipboardCheck}
           judul={saringan === 'pending' ? 'Tidak ada yang menunggu' : 'Belum ada data'}
@@ -359,18 +451,23 @@ export function ApprovalPage() {
           }
         />
       ) : (
-        <div className="space-y-3">
-          {daftar.map((o, i) => (
-            <Muncul key={o.id} delay={Math.min(i * 0.03, 0.24)}>
-              <KartuPO
-                order={o}
-                sekarang={sekarang}
-                onTolak={(order) => setSasaran({ order, mode: 'tolak' })}
-                onBatal={(order) => setSasaran({ order, mode: 'batal' })}
-              />
-            </Muncul>
-          ))}
-        </div>
+        <>
+          <p className="mb-2.5 text-[11px] text-muted-foreground">
+            {kelompok.length} peserta · {daftar.length} PO
+          </p>
+          <div className="space-y-3">
+            {kelompok.map((k, i) => (
+              <Muncul key={k.userId} delay={Math.min(i * 0.03, 0.24)}>
+                <KartuKelompok
+                  kelompok={k}
+                  sekarang={sekarang}
+                  onTolak={(order) => setSasaran({ order, mode: 'tolak' })}
+                  onBatal={(order) => setSasaran({ order, mode: 'batal' })}
+                />
+              </Muncul>
+            ))}
+          </div>
+        </>
       )}
 
       <Dialog
