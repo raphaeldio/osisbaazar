@@ -13,6 +13,7 @@
  * yang bisa menyelesaikan profilnya — artinya tidak ada yang bisa memesan.
  */
 export const DAFTAR_KELAS: string[] = [
+    'Guru',
     'X-Volta',
     'X-Tesla',
     'X-Archimedes',
